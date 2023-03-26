@@ -7,11 +7,9 @@
 	<packaging>jar</packaging>
 	<name>timingsystem.restapi</name>
 	<url>http://maven.apache.org</url>
-	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -30,9 +28,21 @@
 					<release>16</release>
 				</configuration>
 			</plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                	<execution>
+                		<phase>package</phase>
+                		<goals>
+                			<goal>shade</goal>
+                		</goals>
+                	</execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
-	
 	<dependencies>
 		<dependency>
 			<groupId>com.github.Makkuusen</groupId>
@@ -45,6 +55,11 @@
 			<artifactId>paper-api</artifactId>
 			<version>1.19.3-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sparkjava</groupId>
+			<artifactId>spark-core</artifactId>
+			<version>2.9.4</version>
 		</dependency>
 	</dependencies>
 	<repositories>
