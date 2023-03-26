@@ -1,0 +1,6 @@
+# TimingSystemRESTApi v0.0.1+ by Justin "JustBru00 Brubaker 
+rest_api_enabled: true
+
+approved_api_keys:
+  - 'uuid_here'
+      
