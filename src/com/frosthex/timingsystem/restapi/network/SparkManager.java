@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
-import com.frosthex.timingsystem.restapi.utils.Messager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -78,9 +77,7 @@ public class SparkManager {
 			if (heats == null) {
 				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong EventDatabase.getHeats() is null.\"}");
 			}
-			
-			Messager.msgConsole("Heats Size: " + heats.size());
-			
+						
 			JsonObject responseObject = new JsonObject();
 			
 			
