@@ -3,15 +3,25 @@ package com.frosthex.timingsystem.restapi.network;
 import static spark.Spark.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import me.makkuusen.timing.system.TPlayer;
+import me.makkuusen.timing.system.api.TimingSystemAPI;
 import me.makkuusen.timing.system.event.EventDatabase;
 import me.makkuusen.timing.system.heat.Heat;
 import me.makkuusen.timing.system.heat.SpectatorScoreboard;
+import me.makkuusen.timing.system.timetrial.TimeTrialFinish;
+import me.makkuusen.timing.system.track.Track;
+import me.makkuusen.timing.system.track.TrackTag;
 
 /**
  * TimingSystemRESTApi - Provides a basic JSON REST API for the TimingSystem plugin.
@@ -45,6 +55,9 @@ public class SparkManager {
 		staticFiles.externalLocation(pathToPublicHtmlFolder);
 		
 		before("/api/v1/readonly/*", (request, response) -> {
+			// Allow all origins
+			response.header("Access-Control-Allow-Origin", "*");
+			
 			// Authenticate READ ONLY
 			String apiKey = request.queryParams("api_key");
 			if (apiKey == null) {
@@ -66,6 +79,9 @@ public class SparkManager {
 		});
 		
 		before("/api/v1/readwrite/*", (request, response) -> {
+			// Allow all origins
+			response.header("Access-Control-Allow-Origin", "*");
+			
 			// Authenticate READ WRITE
 		});
 		
@@ -78,12 +94,12 @@ public class SparkManager {
 				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong EventDatabase.getHeats() is null.\"}");
 			}
 						
-			JsonObject responseObject = new JsonObject();
-			
+			JsonArray responseArray = new JsonArray();			
 			
 			for (Heat heat : heats) {
 				JsonObject heatObject = new JsonObject();
-				heatObject.addProperty("id", heat.getId());
+				heatObject.addProperty("name", heat.getName());
+				heatObject.addProperty("id", heat.getId());				
 				
 				SpectatorScoreboard scoreboard = heat.getScoreboard();
 				if (scoreboard == null) {
@@ -103,17 +119,120 @@ public class SparkManager {
 				}
 				
 				heatObject.add("scoreboard", scoreboardLinesArray);				
-				if (heat.getName() == null) {
-					responseObject.add("null-name-" + ThreadLocalRandom.current().nextInt(1, 1000), heatObject);
-				} else {
-					responseObject.add(heat.getName(), heatObject);
-				}				
+				responseArray.add(heatObject);
 			}
 			
+			response.status(200);
+			return responseArray.toString();
+		});
+		
+		// /api/v1/readonly/tracks/
+		get("/api/v1/readonly/tracks/", (request, response) -> {			
+			var tracks = TimingSystemAPI.getTracks();
+			
+			if (tracks == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong TimingSystemAPI.getTracks() is null.\"}");
+			}
+			
+			JsonObject tracksResponseObject = new JsonObject();
+			
+			tracksResponseObject.addProperty("number", tracks.size());
+			
+			JsonArray tracksNamesArray = new JsonArray();
+			
+			for (Track track : tracks) {
+				String commandName = track.getCommandName();
+				if (commandName == null) {
+					continue;
+				}
+				tracksNamesArray.add(commandName);
+			}			
+			tracksResponseObject.add("track_command_names", tracksNamesArray);
+			
+			response.status(200);
+			return tracksResponseObject.toString();
+		});
+		
+		// /api/v1/readonly/track/:trackname
+		get("/api/v1/readonly/track/:trackname", (request, response) -> {
+			String trackInternalName = request.params("trackname");
+			
+			if (trackInternalName == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The track name provided is null.\"}");
+			}
+			
+			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
+			if (optionalTrack.isEmpty()) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. Could find a track with that name.\"}");
+			}
+			
+			Track track = optionalTrack.get();
+			
+			JsonObject responseObject = new JsonObject();
+			responseObject.addProperty("command_name", track.getCommandName());
+			responseObject.addProperty("display_name", track.getDisplayName());
+			responseObject.addProperty("mode", track.getModeAsString());
+			responseObject.addProperty("type", track.getTypeAsString());
+			responseObject.addProperty("date_created", track.getDateCreated());
+			responseObject.addProperty("id", track.getId());
+			responseObject.addProperty("total_attempts", track.getTotalAttempts());
+			responseObject.addProperty("total_finishes", track.getTotalFinishes());
+			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
+			responseObject.addProperty("weight", track.getWeight());
+			responseObject.addProperty("gui_item", track.getGuiItem().toString());
+			JsonArray optionsArray = new JsonArray();
+			for (char c : track.getOptions()) {
+				optionsArray.add(c);
+			}
+			responseObject.add("options", optionsArray);		
+			responseObject.addProperty("owner", track.getOwner().getUniqueId().toString());
+			responseObject.add("spawn_location", serializeLocation(track.getSpawnLocation()));
+			JsonArray tagsArray = new JsonArray();
+			for (TrackTag trackTag : track.getTags()) {
+				tagsArray.add(trackTag.getValue());
+			}
+			responseObject.add("tags", tagsArray);
+			JsonArray topListArray = new JsonArray();
+			for (TimeTrialFinish finish : track.getTopList()) {
+				JsonObject timeTrialFinishObject = new JsonObject();
+				timeTrialFinishObject.addProperty("date", finish.getDate());
+				timeTrialFinishObject.addProperty("id", finish.getId());
+				timeTrialFinishObject.addProperty("time", finish.getTime());
+				timeTrialFinishObject.addProperty("track_id", finish.getTrack());
+				timeTrialFinishObject.addProperty("player_uuid", finish.getPlayer().toString());
+			}
+			responseObject.add("top_list", topListArray);
+		
 			response.status(200);
 			return responseObject.toString();
 		});
 		
+		// /api/v1/readonly/player/:uuid
+		get("/api/v1/readonly/player/:uuid", (request, response) -> {			
+			String uuidString = request.params("uuid");
+			
+			if (uuidString == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The uuid provided is null.\"}");
+			}
+			
+			UUID uuid = UUID.randomUUID();
+			
+			try {
+				uuid = UUID.fromString(uuidString);
+			} catch (Exception e) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The UUID couldn't be parsed.\"}");
+			}
+			
+			TPlayer tPlayer = TimingSystemAPI.getTPlayer(uuid);
+			
+			// TODO serialize whole tPlayer object
+			
+			return "";
+		});
+		
+		get("/api/v1/readonly/tracks/example/dontuse", (request, response) -> {
+			return "";
+		});
 	}
 	
 	public static void stopSpark() {
@@ -134,6 +253,18 @@ public class SparkManager {
 
 	public static void setPathToPublicHtmlFolder(String pathToPublicHtmlFolder) {
 		SparkManager.pathToPublicHtmlFolder = pathToPublicHtmlFolder;
+	}
+	
+	private static JsonObject serializeLocation(Location loc) {
+		JsonObject obj = new JsonObject();
+		obj.addProperty("x",loc.getX());
+		obj.addProperty("y",loc.getY());
+		obj.addProperty("z",loc.getZ());
+		obj.addProperty("pitch",loc.getPitch());
+		obj.addProperty("yaw",loc.getYaw());
+		obj.addProperty("world_name",loc.getWorld().getName());
+		
+		return obj;
 	}
 	
 }

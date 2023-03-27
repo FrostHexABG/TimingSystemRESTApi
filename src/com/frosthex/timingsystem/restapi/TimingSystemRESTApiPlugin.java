@@ -45,6 +45,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		Messager.msgConsole("&6Disabled plugin.");
+		SparkManager.stopSpark();
 		instance = null;
 	}
 
