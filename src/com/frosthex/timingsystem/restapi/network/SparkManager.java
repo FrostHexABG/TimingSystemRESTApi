@@ -5,9 +5,6 @@ import static spark.Spark.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
@@ -76,6 +73,8 @@ public class SparkManager {
 			if (!authenticated) {
 				halt(401, "{\"error\":true,\"errorMessage\":\"Unknown api_key. Please provide a valid api_key in your request.\"}");
 			}
+			
+			// TODO RATE LIMIT HERE
 		});
 		
 		before("/api/v1/readwrite/*", (request, response) -> {
@@ -86,8 +85,7 @@ public class SparkManager {
 		});
 		
 		// /api/v1/readonly/events/heats/scoreboards
-		get("/api/v1/readonly/events/heats/scoreboards", (request, response) -> {
-			
+		get("/api/v1/readonly/events/heats/scoreboards", (request, response) -> {			
 			var heats = EventDatabase.getHeats();
 			
 			if (heats == null) {
