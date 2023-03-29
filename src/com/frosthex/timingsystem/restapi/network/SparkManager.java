@@ -231,7 +231,7 @@ public class SparkManager {
 		});
 		
 		// /api/v1/readonly/events/heats/scoreboards
-		get("/api/v1/readonly/events/runningheats/scoreboards", (request, response) -> {
+		get("/api/v1/readonly/events/runningheats/", (request, response) -> {
 			var heats = TimingSystemAPI.getRunningHeats();
 			
 			if (heats == null) {
