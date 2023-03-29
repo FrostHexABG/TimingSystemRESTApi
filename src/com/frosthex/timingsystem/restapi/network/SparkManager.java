@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import me.makkuusen.timing.system.TPlayer;
+import me.makkuusen.timing.system.api.DriverDetails;
 import me.makkuusen.timing.system.api.TimingSystemAPI;
 import me.makkuusen.timing.system.event.EventDatabase;
 import me.makkuusen.timing.system.heat.Heat;
@@ -198,6 +199,7 @@ public class SparkManager {
 				timeTrialFinishObject.addProperty("time", finish.getTime());
 				timeTrialFinishObject.addProperty("track_id", finish.getTrack());
 				timeTrialFinishObject.addProperty("player_uuid", finish.getPlayer().toString());
+				topListArray.add(timeTrialFinishObject);
 			}
 			responseObject.add("top_list", topListArray);
 		
@@ -226,6 +228,49 @@ public class SparkManager {
 			// TODO serialize whole tPlayer object
 			
 			return "";
+		});
+		
+		// /api/v1/readonly/events/heats/scoreboards
+		get("/api/v1/readonly/events/runningheats/scoreboards", (request, response) -> {
+			var heats = TimingSystemAPI.getRunningHeats();
+			
+			if (heats == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong TimingSystem.getRunningHeats() is null.\"}");
+			}
+			
+			JsonArray arrayObj = new JsonArray();
+			
+			for (Heat heat : heats) {
+				JsonObject heatObj = new JsonObject();
+				heatObj.addProperty("name", heat.getName());
+				heatObj.addProperty("event_name", heat.getEvent().getDisplayName());
+				heatObj.addProperty("id", heat.getId());
+				
+				JsonArray driverPositionsArray = new JsonArray();
+				var driverDetailsList = TimingSystemAPI.getAllDriverDetailsFromHeat(heat);
+								
+				for (DriverDetails dd : driverDetailsList) {
+					JsonObject driverObj = new JsonObject();
+					driverObj.addProperty("name", dd.getName());
+					driverObj.addProperty("team_color", dd.getTeamColor());
+					driverObj.addProperty("uuid", dd.getUuid());
+					driverObj.addProperty("gap", dd.getGap());
+					driverObj.addProperty("gap_to_leader", dd.getGapFromLeader());
+					driverObj.addProperty("laps", dd.getLaps());
+					driverObj.addProperty("pits", dd.getPits());
+					driverObj.addProperty("position", dd.getPosition());
+					driverObj.addProperty("start_position", dd.getStartPosition());
+					driverObj.addProperty("is_in_pit", dd.isInpit());
+					driverObj.addProperty("is_offline", dd.isOffline());
+					
+					driverPositionsArray.add(driverObj);
+				}
+				heatObj.add("driver_details", driverPositionsArray);
+				arrayObj.add(heatObj);
+			}
+			
+			response.status(200);
+			return arrayObj.toString();
 		});
 		
 		get("/api/v1/readonly/tracks/example/dontuse", (request, response) -> {

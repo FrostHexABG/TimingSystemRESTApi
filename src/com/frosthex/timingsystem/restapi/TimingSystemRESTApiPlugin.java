@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.frosthex.timingsystem.restapi.bstats.BStats;
@@ -54,10 +55,16 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 		instance = this;
 		Messager.msgConsole("&6Plugin is loading...");
 		
-		if (Bukkit.getPluginManager().getPlugin("TimingSystem") == null) {
+		Plugin timingSystem = Bukkit.getPluginManager().getPlugin("TimingSystem");
+		if (timingSystem == null) {
 			// TimingSystem isn't installed.
 			Bukkit.getPluginManager().disablePlugin(instance);
 			return;
+		} else {
+			// TimingSystem version check
+			if (!timingSystem.getDescription().getVersion().contains("1.2")) {
+				Messager.msgConsole("&cTimingSystemRESTApi only supports TimingSystem version 1.2 at this time. The REST API will run but you may encounter errors.");
+			}	
 		}
 		
 		// Config
