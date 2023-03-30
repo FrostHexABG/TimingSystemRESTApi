@@ -125,8 +125,8 @@ public class SparkManager {
 			return responseArray.toString();
 		});
 		
-		// /api/v1/readonly/tracks/
-		get("/api/v1/readonly/tracks/", (request, response) -> {			
+		// /api/v1/readonly/tracks
+		get("/api/v1/readonly/tracks", (request, response) -> {			
 			var tracks = TimingSystemAPI.getTracks();
 			
 			if (tracks == null) {
@@ -152,8 +152,8 @@ public class SparkManager {
 			return tracksResponseObject.toString();
 		});
 		
-		// /api/v1/readonly/track/:trackname
-		get("/api/v1/readonly/track/:trackname", (request, response) -> {
+		// /api/v1/readonly/tracks/:trackname
+		get("/api/v1/readonly/tracks/:trackname", (request, response) -> {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
@@ -207,8 +207,8 @@ public class SparkManager {
 			return responseObject.toString();
 		});
 		
-		// /api/v1/readonly/player/:uuid
-		get("/api/v1/readonly/player/:uuid", (request, response) -> {			
+		// /api/v1/readonly/players/:uuid
+		get("/api/v1/readonly/players/:uuid", (request, response) -> {			
 			String uuidString = request.params("uuid");
 			
 			if (uuidString == null) {
@@ -231,7 +231,7 @@ public class SparkManager {
 		});
 		
 		// /api/v1/readonly/events/heats/scoreboards
-		get("/api/v1/readonly/events/runningheats/", (request, response) -> {
+		get("/api/v1/readonly/events/running-heats", (request, response) -> {
 			var heats = TimingSystemAPI.getRunningHeats();
 			
 			if (heats == null) {
