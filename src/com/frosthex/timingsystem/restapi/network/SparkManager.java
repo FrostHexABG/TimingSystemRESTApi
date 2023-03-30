@@ -85,46 +85,6 @@ public class SparkManager {
 			// Authenticate READ WRITE
 		});
 		
-		// /api/v1/readonly/events/heats/scoreboards
-		get("/api/v1/readonly/events/heats/scoreboards", (request, response) -> {			
-			var heats = EventDatabase.getHeats();
-			
-			if (heats == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong EventDatabase.getHeats() is null.\"}");
-			}
-						
-			JsonArray responseArray = new JsonArray();			
-			
-			for (Heat heat : heats) {
-				JsonObject heatObject = new JsonObject();
-				heatObject.addProperty("name", heat.getName());
-				heatObject.addProperty("id", heat.getId());				
-				
-				SpectatorScoreboard scoreboard = heat.getScoreboard();
-				if (scoreboard == null) {
-					continue;
-				}				
-				
-				List<String> scoreBoardLines = scoreboard.normalScoreboard();
-				
-				if (scoreBoardLines == null) {
-					continue;
-				}
-				
-				JsonArray scoreboardLinesArray = new JsonArray();
-				
-				for (String scoreLine : scoreBoardLines) {
-					scoreboardLinesArray.add(scoreLine);
-				}
-				
-				heatObject.add("scoreboard", scoreboardLinesArray);				
-				responseArray.add(heatObject);
-			}
-			
-			response.status(200);
-			return responseArray.toString();
-		});
-		
 		// /api/v1/readonly/tracks
 		get("/api/v1/readonly/tracks", (request, response) -> {			
 			var tracks = TimingSystemAPI.getTracks();
