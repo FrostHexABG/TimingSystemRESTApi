@@ -183,7 +183,6 @@ public class SparkManager {
 			
 			TPlayer tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
-			// TODO serialize whole tPlayer object
 			JsonObject responseObject = new JsonObject();
 			responseObject.addProperty("uuid", preventNull(tPlayer.getUniqueId().toString()));
 			responseObject.addProperty("name", preventNull(tPlayer.getName()));

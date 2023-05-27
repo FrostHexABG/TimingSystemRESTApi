@@ -60,7 +60,8 @@ public class BStats {
    * @param serviceId The id of the service. It can be found at <a
    *     href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
    */
-  public BStats(JavaPlugin plugin, int serviceId) {
+  @SuppressWarnings("deprecation")
+public BStats(JavaPlugin plugin, int serviceId) {
     this.plugin = plugin;
     // Get the config file
     File bStatsFolder = new File(plugin.getDataFolder().getParentFile(), "bStats");
@@ -136,7 +137,8 @@ public class BStats {
     builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());
   }
 
-  private void appendServiceData(JsonObjectBuilder builder) {
+  @SuppressWarnings("deprecation")
+private void appendServiceData(JsonObjectBuilder builder) {
     builder.appendField("pluginVersion", plugin.getDescription().getVersion());
   }
 

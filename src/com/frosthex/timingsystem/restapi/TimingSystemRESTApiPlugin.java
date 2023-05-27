@@ -50,6 +50,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 		instance = null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -88,21 +89,25 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 		}
 		
 		// bStats
+		@SuppressWarnings("unused")
 		BStats metrics = new BStats(this, BSTATS_PLUGIN_ID);
 		
 		// Commands
 		// TODO
 		
 		// Strike the flint, ignite the spark IN 20 seconds		
-		Bukkit.getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
-			
-			@Override
-			public void run() {
-				Messager.msgConsole("&6Striking the flint, igniting the spark.");
-				SparkManager.initSpark();				
-			}
-		}, 20*20);
-		
+		if (getConfig().getBoolean("rest_api_enabled")) {
+			Bukkit.getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
+				
+				@Override
+				public void run() {
+					Messager.msgConsole("&6Striking the flint, igniting the spark.");
+					SparkManager.initSpark();				
+				}
+			}, 20*20);
+		} else {
+			Messager.msgConsole("&cThe REST api is disabled in the config. Please enable it by setting rest_api_enabled to true.");
+		}
 		
 		Messager.msgConsole("&aPlugin enabled.");
 	}
