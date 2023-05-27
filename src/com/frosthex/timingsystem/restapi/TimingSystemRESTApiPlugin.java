@@ -9,6 +9,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.frosthex.timingsystem.restapi.bstats.BStats;
+import com.frosthex.timingsystem.restapi.commands.TimingSystemRestApiCommand;
 import com.frosthex.timingsystem.restapi.network.SparkManager;
 import com.frosthex.timingsystem.restapi.utils.Messager;
 
@@ -36,6 +37,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 	
 	private static TimingSystemRESTApiPlugin instance;
 	private static final int BSTATS_PLUGIN_ID = 18069;
+	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"1.2", "1.3"};
 	
 	public static ConsoleCommandSender clogger = Bukkit.getServer().getConsoleSender();
 	public static Logger log = Bukkit.getLogger();
@@ -63,8 +65,18 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 			return;
 		} else {
 			// TimingSystem version check
-			if (!timingSystem.getDescription().getVersion().contains("1.2")) {
-				Messager.msgConsole("&cTimingSystemRESTApi only supports TimingSystem version 1.2 at this time. The REST API will run but you may encounter errors.");
+			String timingSystemVersion = timingSystem.getDescription().getVersion();
+			boolean supportedVersion = false;
+			for (String version : TIMING_SYSTEM_SUPPORTED_VERSIONS) {
+				if (timingSystemVersion.contains(version)) {
+					supportedVersion = true;
+					break;
+				}
+			}		
+			
+			if (!supportedVersion) {
+				Messager.msgConsole("&cTimingSystemRESTApi version " + getDescription().getVersion() + " doesn't support TimingSystem version "
+			+ timingSystemVersion + ". The REST api will attempt to run as normal, but you may encounter issues.");
 			}	
 		}
 		
@@ -89,11 +101,12 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 		}
 		
 		// bStats
-		@SuppressWarnings("unused")
-		BStats metrics = new BStats(this, BSTATS_PLUGIN_ID);
+		BStats metrics = new BStats(this, BSTATS_PLUGIN_ID);	
+		String timingSystemVersion = timingSystem.getDescription().getVersion();
+		metrics.addCustomChart(new BStats.SimplePie("timingsystem_version", () -> timingSystemVersion));
 		
 		// Commands
-		// TODO
+		getCommand("timingsystemrestapi").setExecutor(new TimingSystemRestApiCommand());
 		
 		// Strike the flint, ignite the spark IN 20 seconds		
 		if (getConfig().getBoolean("rest_api_enabled")) {
