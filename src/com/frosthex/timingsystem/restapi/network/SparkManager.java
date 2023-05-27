@@ -2,7 +2,6 @@ package com.frosthex.timingsystem.restapi.network;
 
 import static spark.Spark.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.Location;
@@ -14,9 +13,7 @@ import com.google.gson.JsonObject;
 import me.makkuusen.timing.system.TPlayer;
 import me.makkuusen.timing.system.api.DriverDetails;
 import me.makkuusen.timing.system.api.TimingSystemAPI;
-import me.makkuusen.timing.system.event.EventDatabase;
 import me.makkuusen.timing.system.heat.Heat;
-import me.makkuusen.timing.system.heat.SpectatorScoreboard;
 import me.makkuusen.timing.system.timetrial.TimeTrialFinish;
 import me.makkuusen.timing.system.track.Track;
 import me.makkuusen.timing.system.track.TrackTag;
@@ -132,6 +129,7 @@ public class SparkManager {
 			responseObject.addProperty("display_name", track.getDisplayName());
 			responseObject.addProperty("mode", track.getModeAsString());
 			responseObject.addProperty("type", track.getTypeAsString());
+			responseObject.addProperty("open", track.isOpen());
 			responseObject.addProperty("date_created", track.getDateCreated());
 			responseObject.addProperty("id", track.getId());
 			responseObject.addProperty("total_attempts", track.getTotalAttempts());
@@ -172,7 +170,7 @@ public class SparkManager {
 			String uuidString = request.params("uuid");
 			
 			if (uuidString == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The uuid provided is null.\"}");
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The UUID provided is null.\"}");
 			}
 			
 			UUID uuid = UUID.randomUUID();
@@ -187,10 +185,11 @@ public class SparkManager {
 			
 			// TODO serialize whole tPlayer object
 			
+			
 			return "";
 		});
 		
-		// /api/v1/readonly/events/heats/scoreboards
+		// /api/v1/readonly/events/running-heats
 		get("/api/v1/readonly/events/running-heats", (request, response) -> {
 			var heats = TimingSystemAPI.getRunningHeats();
 			

@@ -4,7 +4,7 @@
   <groupId>com.frosthex</groupId>
   <artifactId>timingsystem.restapi</artifactId>
   <name>timingsystem.restapi</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <url>http://maven.apache.org</url>
   <build>
     <sourceDirectory>src</sourceDirectory>
