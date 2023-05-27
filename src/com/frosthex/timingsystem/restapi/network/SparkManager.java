@@ -184,9 +184,18 @@ public class SparkManager {
 			TPlayer tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
 			// TODO serialize whole tPlayer object
+			JsonObject responseObject = new JsonObject();
+			responseObject.addProperty("uuid", preventNull(tPlayer.getUniqueId().toString()));
+			responseObject.addProperty("name", preventNull(tPlayer.getName()));
+			responseObject.addProperty("display_name", preventNull(tPlayer.getNameDisplay()));
+			responseObject.addProperty("color_code", preventNull(tPlayer.getColorCode()));
+			responseObject.addProperty("hex_color", preventNull(tPlayer.getHexColor()));
+			responseObject.addProperty("boat_type", preventNull(tPlayer.getBoat().toString()));
+			responseObject.addProperty("boat_material", preventNull(tPlayer.getBoatMaterial().toString()));
+			responseObject.addProperty("bukkit_color", preventNull(tPlayer.getBukkitColor().toString()));
 			
-			
-			return "";
+			response.status(200);
+			return responseObject.toString();
 		});
 		
 		// /api/v1/readonly/events/running-heats
@@ -267,6 +276,13 @@ public class SparkManager {
 		obj.addProperty("world_name",loc.getWorld().getName());
 		
 		return obj;
+	}
+	
+	private static String preventNull(String possibleNull) {
+		if (possibleNull == null) {
+			return "null";
+		}
+		return possibleNull;
 	}
 	
 }
