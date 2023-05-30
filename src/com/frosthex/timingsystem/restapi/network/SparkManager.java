@@ -183,6 +183,10 @@ public class SparkManager {
 			
 			TPlayer tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
+			if (tPlayer == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. That player couldn't be found.\"}");
+			}
+			
 			JsonObject responseObject = new JsonObject();
 			responseObject.addProperty("uuid", preventNull(tPlayer.getUniqueId().toString()));
 			responseObject.addProperty("name", preventNull(tPlayer.getName()));
