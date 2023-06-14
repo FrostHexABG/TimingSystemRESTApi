@@ -4,7 +4,10 @@ import static spark.Spark.*;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
 import com.google.gson.JsonArray;
@@ -165,23 +168,30 @@ public class SparkManager {
 			return responseObject.toString();
 		});
 		
-		// /api/v1/readonly/players/:uuid
-		get("/api/v1/readonly/players/:uuid", (request, response) -> {			
-			String uuidString = request.params("uuid");
+		// /api/v1/readonly/players/:uuid OR /api/v1/readonly/players/:username
+		get("/api/v1/readonly/players/:uuidorusername", (request, response) -> {			
+			String uuidOrUsernameString = request.params("uuidorusername");
 			
-			if (uuidString == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The UUID provided is null.\"}");
-			}
+			if (uuidOrUsernameString == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. UUID or username argument was null\"}");
+			}			
 			
 			UUID uuid = UUID.randomUUID();
+			TPlayer tPlayer = null;
 			
 			try {
-				uuid = UUID.fromString(uuidString);
+				uuid = UUID.fromString(uuidOrUsernameString);
 			} catch (Exception e) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The UUID couldn't be parsed.\"}");
+				OfflinePlayer offline = Bukkit.getOfflinePlayerIfCached(uuidOrUsernameString);
+				
+				if (offline == null) {
+					halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. UUID or username couldn't be parsed from input.\"}");
+				} else {
+					uuid = offline.getUniqueId();
+				}				
 			}
 			
-			TPlayer tPlayer = TimingSystemAPI.getTPlayer(uuid);
+			tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
 			if (tPlayer == null) {
 				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. That player couldn't be found.\"}");
