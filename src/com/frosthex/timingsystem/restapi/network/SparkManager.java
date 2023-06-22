@@ -167,6 +167,62 @@ public class SparkManager {
 			return responseObject.toString();
 		});
 		
+		// /api/v1/readonly/tracks/:trackname/withusernames
+		get("/api/v1/readonly/tracks/:trackname/withusernames", (request, response) -> {
+			String trackInternalName = request.params("trackname");
+			
+			if (trackInternalName == null) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The track name provided is null.\"}");
+			}
+			
+			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
+			if (optionalTrack.isEmpty()) {
+				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. Could find a track with that name.\"}");
+			}
+			
+			Track track = optionalTrack.get();
+			
+			JsonObject responseObject = new JsonObject();
+			responseObject.addProperty("command_name", track.getCommandName());
+			responseObject.addProperty("display_name", track.getDisplayName());
+			responseObject.addProperty("mode", track.getModeAsString());
+			responseObject.addProperty("type", track.getTypeAsString());
+			responseObject.addProperty("open", track.isOpen());
+			responseObject.addProperty("date_created", track.getDateCreated());
+			responseObject.addProperty("id", track.getId());
+			responseObject.addProperty("total_attempts", track.getTotalAttempts());
+			responseObject.addProperty("total_finishes", track.getTotalFinishes());
+			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
+			responseObject.addProperty("weight", track.getWeight());
+			responseObject.addProperty("gui_item", track.getGuiItem().toString());
+			JsonArray optionsArray = new JsonArray();
+			for (char c : track.getOptions()) {
+				optionsArray.add(c);
+			}
+			responseObject.add("options", optionsArray);		
+			responseObject.addProperty("owner", track.getOwner().getUniqueId().toString());
+			responseObject.add("spawn_location", serializeLocation(track.getSpawnLocation()));
+			JsonArray tagsArray = new JsonArray();
+			for (TrackTag trackTag : track.getTags()) {
+				tagsArray.add(trackTag.getValue());
+			}
+			responseObject.add("tags", tagsArray);
+			JsonArray topListArray = new JsonArray();
+			for (TimeTrialFinish finish : track.getTopList()) {
+				JsonObject timeTrialFinishObject = new JsonObject();
+				timeTrialFinishObject.addProperty("date", finish.getDate());
+				timeTrialFinishObject.addProperty("id", finish.getId());
+				timeTrialFinishObject.addProperty("time", finish.getTime());
+				timeTrialFinishObject.addProperty("player_uuid", finish.getPlayer().getUniqueId().toString());
+				timeTrialFinishObject.addProperty("username", finish.getPlayer().getName());
+				topListArray.add(timeTrialFinishObject);
+			}
+			responseObject.add("top_list", topListArray);
+		
+			response.status(200);
+			return responseObject.toString();
+		});
+		
 		// /api/v1/readonly/players/:uuid OR /api/v1/readonly/players/:username
 		get("/api/v1/readonly/players/:uuidorusername", (request, response) -> {			
 			String uuidOrUsernameString = request.params("uuidorusername");
