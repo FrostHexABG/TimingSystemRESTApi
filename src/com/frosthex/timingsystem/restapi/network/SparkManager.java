@@ -158,7 +158,6 @@ public class SparkManager {
 				timeTrialFinishObject.addProperty("date", finish.getDate());
 				timeTrialFinishObject.addProperty("id", finish.getId());
 				timeTrialFinishObject.addProperty("time", finish.getTime());
-				timeTrialFinishObject.addProperty("track_id", finish.getTrack());
 				timeTrialFinishObject.addProperty("player_uuid", finish.getPlayer().getUniqueId().toString());
 				topListArray.add(timeTrialFinishObject);
 			}
