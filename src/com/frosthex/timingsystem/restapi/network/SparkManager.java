@@ -298,6 +298,7 @@ public class SparkManager {
 					driverObj.addProperty("start_position", dd.getStartPosition());
 					driverObj.addProperty("is_in_pit", dd.isInpit());
 					driverObj.addProperty("is_offline", dd.isOffline());
+					driverObj.addProperty("best_lap", dd.getBestLap());
 					
 					driverPositionsArray.add(driverObj);
 				}
