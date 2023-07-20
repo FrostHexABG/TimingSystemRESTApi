@@ -52,14 +52,14 @@ public class SparkManager {
 		port(port);
 		staticFiles.externalLocation(pathToPublicHtmlFolder);
 		
-		before("/api/v1/readonly/*", (request, response) -> {
+		before("/api/*/readonly/*", (request, response) -> {
 			// Allow all origins
 			response.header("Access-Control-Allow-Origin", "*");
 			
 			// Authenticate READ ONLY
 			String apiKey = request.queryParams("api_key");
 			if (apiKey == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Couldn't read api_key. Please provide a valid api_key in your request.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Couldn't read api_key. Please provide a valid api_key in your request.\"}");
 			}
 			
 			boolean authenticated = false;
@@ -72,13 +72,13 @@ public class SparkManager {
 			}
 			
 			if (!authenticated) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Unknown api_key. Please provide a valid api_key in your request.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Unknown api_key. Please provide a valid api_key in your request.\"}");
 			}
 			
 			// TODO RATE LIMIT HERE
 		});
 		
-		before("/api/v1/readwrite/*", (request, response) -> {
+		before("/api/*/readwrite/*", (request, response) -> {
 			// Allow all origins
 			response.header("Access-Control-Allow-Origin", "*");
 			
@@ -90,7 +90,7 @@ public class SparkManager {
 			var tracks = TimingSystemAPI.getTracks();
 			
 			if (tracks == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong TimingSystemAPI.getTracks() is null.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
 			}
 			
 			JsonObject tracksResponseObject = new JsonObject();
@@ -112,17 +112,70 @@ public class SparkManager {
 			return tracksResponseObject.toString();
 		});
 		
+		// /api/v2/readonly/tracks
+		get("/api/v2/readonly/tracks", (request, response) -> {			
+			var tracks = TimingSystemAPI.getTracks();
+			
+			if (tracks == null) {
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
+			}
+			
+			JsonObject tracksResponseObject = new JsonObject();
+			
+			tracksResponseObject.addProperty("number", tracks.size());
+			
+			JsonArray tracksListObject = new JsonArray();
+			
+			for (Track track : tracks) {
+				if (track.getCommandName() == null) {
+					continue;
+				}
+				JsonObject trackObj = new JsonObject();
+				trackObj.addProperty("command_name", track.getCommandName());
+				trackObj.addProperty("display_name", track.getDisplayName());
+				trackObj.addProperty("mode", track.getModeAsString());
+				trackObj.addProperty("type", track.getTypeAsString());
+				trackObj.addProperty("open", track.isOpen());
+				trackObj.addProperty("date_created", track.getDateCreated());
+				trackObj.addProperty("id", track.getId());
+				trackObj.addProperty("total_attempts", track.getTotalAttempts());
+				trackObj.addProperty("total_finishes", track.getTotalFinishes());
+				trackObj.addProperty("total_time_spent", track.getTotalTimeSpent());
+				trackObj.addProperty("weight", track.getWeight());
+				trackObj.addProperty("gui_item", track.getGuiItem().toString());
+				JsonArray optionsArray = new JsonArray();
+				for (char c : track.getOptions()) {
+					optionsArray.add(c);
+				}
+				trackObj.add("options", optionsArray);		
+				trackObj.addProperty("owner", track.getOwner().getUniqueId().toString());
+				trackObj.add("spawn_location", serializeLocation(track.getSpawnLocation()));
+				JsonArray tagsArray = new JsonArray();
+				for (TrackTag trackTag : track.getTags()) {
+					tagsArray.add(trackTag.getValue());
+				}
+				trackObj.add("tags", tagsArray);
+				
+				tracksListObject.add(trackObj);
+			}
+			
+			tracksResponseObject.add("tracks", tracksListObject);
+			
+			response.status(200);
+			return tracksResponseObject.toString();
+		});		
+		
 		// /api/v1/readonly/tracks/:trackname
 		get("/api/v1/readonly/tracks/:trackname", (request, response) -> {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The track name provided is null.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
 			}
 			
 			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
 			if (optionalTrack.isEmpty()) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. Could find a track with that name.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find a track with that name.\"}");
 			}
 			
 			Track track = optionalTrack.get();
@@ -172,12 +225,12 @@ public class SparkManager {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. The track name provided is null.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
 			}
 			
 			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
 			if (optionalTrack.isEmpty()) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. Could find a track with that name.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find a track with that name.\"}");
 			}
 			
 			Track track = optionalTrack.get();
@@ -228,7 +281,7 @@ public class SparkManager {
 			String uuidOrUsernameString = request.params("uuidorusername");
 			
 			if (uuidOrUsernameString == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. UUID or username argument was null\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username argument was null\"}");
 			}			
 			
 			UUID uuid = UUID.randomUUID();
@@ -240,7 +293,7 @@ public class SparkManager {
 				OfflinePlayer offline = Bukkit.getOfflinePlayerIfCached(uuidOrUsernameString);
 				
 				if (offline == null) {
-					halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. UUID or username couldn't be parsed from input.\"}");
+					halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username couldn't be parsed from input.\"}");
 				} else {
 					uuid = offline.getUniqueId();
 				}				
@@ -249,7 +302,7 @@ public class SparkManager {
 			tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
 			if (tPlayer == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong. That player couldn't be found.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. That player couldn't be found.\"}");
 			}
 			
 			JsonObject responseObject = new JsonObject();
@@ -271,7 +324,7 @@ public class SparkManager {
 			var heats = TimingSystemAPI.getRunningHeats();
 			
 			if (heats == null) {
-				halt(401, "{\"error\":true,\"errorMessage\":\"Something went wrong TimingSystem.getRunningHeats() is null.\"}");
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong TimingSystem.getRunningHeats() is null.\"}");
 			}
 			
 			JsonArray arrayObj = new JsonArray();

@@ -37,7 +37,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 	
 	private static TimingSystemRESTApiPlugin instance;
 	private static final int BSTATS_PLUGIN_ID = 18069;
-	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"1.2", "1.3"};
+	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"1.2", "1.3", "1.5"};
 	
 	public static ConsoleCommandSender clogger = Bukkit.getServer().getConsoleSender();
 	public static Logger log = Bukkit.getLogger();
@@ -108,7 +108,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 		// Commands
 		getCommand("timingsystemrestapi").setExecutor(new TimingSystemRestApiCommand());
 		
-		// Strike the flint, ignite the spark IN 20 seconds		
+		// Strike the flint, ignite the spark in 20 seconds		
 		if (getConfig().getBoolean("rest_api_enabled")) {
 			Bukkit.getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
 				

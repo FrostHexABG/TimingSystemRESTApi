@@ -1,5 +1,5 @@
 name: TimingSystemRESTApi
-version: 0.0.5
+version: 0.0.6
 authors: [Justin Brubaker (JustBru00)]
 softdepend: [TimingSystem]
 main: com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin

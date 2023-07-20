@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.frosthex</groupId>
 	<artifactId>timingsystem.restapi</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
 	<packaging>jar</packaging>
 	<name>timingsystem.restapi</name>
 	<url>http://maven.apache.org</url>
