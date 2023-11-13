@@ -53,6 +53,8 @@ public class SparkManager {
 		staticFiles.externalLocation(pathToPublicHtmlFolder);
 		
 		before("/api/*/readonly/*", (request, response) -> {
+			response.type("application/json");
+			
 			// Allow all origins
 			response.header("Access-Control-Allow-Origin", "*");
 			
