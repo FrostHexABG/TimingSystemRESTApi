@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
 
+@SuppressWarnings("deprecation")
 public class Messager {	
 	
 	private static final Pattern RGB_PATTERN = Pattern.compile("(&)?&#([0-9a-fA-F]{6})");

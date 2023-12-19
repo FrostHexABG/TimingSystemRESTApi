@@ -1,6 +1,11 @@
 package com.frosthex.timingsystem.restapi.network;
 
-import static spark.Spark.*;
+import static spark.Spark.before;
+import static spark.Spark.get;
+import static spark.Spark.halt;
+import static spark.Spark.port;
+import static spark.Spark.staticFiles;
+import static spark.Spark.stop;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -13,13 +18,14 @@ import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import me.makkuusen.timing.system.TPlayer;
 import me.makkuusen.timing.system.api.DriverDetails;
 import me.makkuusen.timing.system.api.TimingSystemAPI;
 import me.makkuusen.timing.system.heat.Heat;
 import me.makkuusen.timing.system.timetrial.TimeTrialFinish;
+import me.makkuusen.timing.system.tplayer.TPlayer;
 import me.makkuusen.timing.system.track.Track;
-import me.makkuusen.timing.system.track.TrackTag;
+import me.makkuusen.timing.system.track.options.TrackOption;
+import me.makkuusen.timing.system.track.tags.TrackTag;
 
 /**
  * TimingSystemRESTApi - Provides a basic JSON REST API for the TimingSystem plugin.
@@ -53,6 +59,9 @@ public class SparkManager {
 		staticFiles.externalLocation(pathToPublicHtmlFolder);
 		
 		before("/api/*/readonly/*", (request, response) -> {
+			// Set MIME type for responses #16
+			response.type("application/json");
+			
 			// Allow all origins
 			response.header("Access-Control-Allow-Origin", "*");
 			
@@ -112,8 +121,8 @@ public class SparkManager {
 			return tracksResponseObject.toString();
 		});
 		
-		// /api/v2/readonly/tracks
-		get("/api/v2/readonly/tracks", (request, response) -> {			
+		// /api/v3/readonly/tracks
+		get("/api/v3/readonly/tracks", (request, response) -> {			
 			var tracks = TimingSystemAPI.getTracks();
 			
 			if (tracks == null) {
@@ -133,25 +142,24 @@ public class SparkManager {
 				JsonObject trackObj = new JsonObject();
 				trackObj.addProperty("command_name", track.getCommandName());
 				trackObj.addProperty("display_name", track.getDisplayName());
-				trackObj.addProperty("mode", track.getModeAsString());
 				trackObj.addProperty("type", track.getTypeAsString());
 				trackObj.addProperty("open", track.isOpen());
 				trackObj.addProperty("date_created", track.getDateCreated());
 				trackObj.addProperty("id", track.getId());
-				trackObj.addProperty("total_attempts", track.getTotalAttempts());
-				trackObj.addProperty("total_finishes", track.getTotalFinishes());
+				trackObj.addProperty("total_attempts", track.getTimeTrials().getTotalAttempts());
+				trackObj.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 				trackObj.addProperty("total_time_spent", track.getTotalTimeSpent());
 				trackObj.addProperty("weight", track.getWeight());
-				trackObj.addProperty("gui_item", track.getGuiItem().toString());
+				trackObj.addProperty("gui_item", track.getItem().toString());
 				JsonArray optionsArray = new JsonArray();
-				for (char c : track.getOptions()) {
-					optionsArray.add(c);
+				for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
+					optionsArray.add(option.toString());
 				}
 				trackObj.add("options", optionsArray);		
 				trackObj.addProperty("owner", track.getOwner().getUniqueId().toString());
 				trackObj.add("spawn_location", serializeLocation(track.getSpawnLocation()));
 				JsonArray tagsArray = new JsonArray();
-				for (TrackTag trackTag : track.getTags()) {
+				for (TrackTag trackTag : track.getTrackTags().get()) {
 					tagsArray.add(trackTag.getValue());
 				}
 				trackObj.add("tags", tagsArray);
@@ -165,8 +173,8 @@ public class SparkManager {
 			return tracksResponseObject.toString();
 		});		
 		
-		// /api/v1/readonly/tracks/:trackname
-		get("/api/v1/readonly/tracks/:trackname", (request, response) -> {
+		// /api/v2/readonly/tracks/:trackname
+		get("/api/v2/readonly/tracks/:trackname", (request, response) -> {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
@@ -183,30 +191,29 @@ public class SparkManager {
 			JsonObject responseObject = new JsonObject();
 			responseObject.addProperty("command_name", track.getCommandName());
 			responseObject.addProperty("display_name", track.getDisplayName());
-			responseObject.addProperty("mode", track.getModeAsString());
 			responseObject.addProperty("type", track.getTypeAsString());
 			responseObject.addProperty("open", track.isOpen());
 			responseObject.addProperty("date_created", track.getDateCreated());
 			responseObject.addProperty("id", track.getId());
-			responseObject.addProperty("total_attempts", track.getTotalAttempts());
-			responseObject.addProperty("total_finishes", track.getTotalFinishes());
+			responseObject.addProperty("total_attempts", track.getTimeTrials().getTotalAttempts());
+			responseObject.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
 			responseObject.addProperty("weight", track.getWeight());
-			responseObject.addProperty("gui_item", track.getGuiItem().toString());
+			responseObject.addProperty("gui_item", track.getItem().toString());
 			JsonArray optionsArray = new JsonArray();
-			for (char c : track.getOptions()) {
-				optionsArray.add(c);
+			for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
+				optionsArray.add(option.toString());
 			}
 			responseObject.add("options", optionsArray);		
 			responseObject.addProperty("owner", track.getOwner().getUniqueId().toString());
 			responseObject.add("spawn_location", serializeLocation(track.getSpawnLocation()));
 			JsonArray tagsArray = new JsonArray();
-			for (TrackTag trackTag : track.getTags()) {
+			for (TrackTag trackTag : track.getTrackTags().get()) {
 				tagsArray.add(trackTag.getValue());
 			}
 			responseObject.add("tags", tagsArray);
 			JsonArray topListArray = new JsonArray();
-			for (TimeTrialFinish finish : track.getTopList()) {
+			for (TimeTrialFinish finish : track.getTimeTrials().getTopList()) {
 				JsonObject timeTrialFinishObject = new JsonObject();
 				timeTrialFinishObject.addProperty("date", finish.getDate());
 				timeTrialFinishObject.addProperty("id", finish.getId());
@@ -220,8 +227,8 @@ public class SparkManager {
 			return responseObject.toString();
 		});
 		
-		// /api/v1/readonly/tracks/:trackname/withusernames
-		get("/api/v1/readonly/tracks/:trackname/withusernames", (request, response) -> {
+		// /api/v2/readonly/tracks/:trackname/withusernames
+		get("/api/v2/readonly/tracks/:trackname/withusernames", (request, response) -> {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
@@ -238,30 +245,29 @@ public class SparkManager {
 			JsonObject responseObject = new JsonObject();
 			responseObject.addProperty("command_name", track.getCommandName());
 			responseObject.addProperty("display_name", track.getDisplayName());
-			responseObject.addProperty("mode", track.getModeAsString());
 			responseObject.addProperty("type", track.getTypeAsString());
 			responseObject.addProperty("open", track.isOpen());
 			responseObject.addProperty("date_created", track.getDateCreated());
 			responseObject.addProperty("id", track.getId());
-			responseObject.addProperty("total_attempts", track.getTotalAttempts());
-			responseObject.addProperty("total_finishes", track.getTotalFinishes());
+			responseObject.addProperty("total_attempts", track.getTimeTrials().getTotalAttempts());
+			responseObject.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
 			responseObject.addProperty("weight", track.getWeight());
-			responseObject.addProperty("gui_item", track.getGuiItem().toString());
+			responseObject.addProperty("gui_item", track.getItem().toString());
 			JsonArray optionsArray = new JsonArray();
-			for (char c : track.getOptions()) {
-				optionsArray.add(c);
+			for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
+				optionsArray.add(option.toString());
 			}
 			responseObject.add("options", optionsArray);		
 			responseObject.addProperty("owner", track.getOwner().getUniqueId().toString());
 			responseObject.add("spawn_location", serializeLocation(track.getSpawnLocation()));
 			JsonArray tagsArray = new JsonArray();
-			for (TrackTag trackTag : track.getTags()) {
+			for (TrackTag trackTag : track.getTrackTags().get()) {
 				tagsArray.add(trackTag.getValue());
 			}
 			responseObject.add("tags", tagsArray);
 			JsonArray topListArray = new JsonArray();
-			for (TimeTrialFinish finish : track.getTopList()) {
+			for (TimeTrialFinish finish : track.getTimeTrials().getTopList()) {
 				JsonObject timeTrialFinishObject = new JsonObject();
 				timeTrialFinishObject.addProperty("date", finish.getDate());
 				timeTrialFinishObject.addProperty("id", finish.getId());
@@ -270,8 +276,8 @@ public class SparkManager {
 				timeTrialFinishObject.addProperty("username", finish.getPlayer().getName());
 				topListArray.add(timeTrialFinishObject);
 			}
-			responseObject.add("top_list", topListArray);
-		
+			responseObject.add("top_list", topListArray);		
+			
 			response.status(200);
 			return responseObject.toString();
 		});
@@ -309,11 +315,11 @@ public class SparkManager {
 			responseObject.addProperty("uuid", preventNull(tPlayer.getUniqueId().toString()));
 			responseObject.addProperty("name", preventNull(tPlayer.getName()));
 			responseObject.addProperty("display_name", preventNull(tPlayer.getNameDisplay()));
-			responseObject.addProperty("color_code", preventNull(tPlayer.getColorCode()));
-			responseObject.addProperty("hex_color", preventNull(tPlayer.getHexColor()));
-			responseObject.addProperty("boat_type", preventNull(tPlayer.getBoat().toString()));
-			responseObject.addProperty("boat_material", preventNull(tPlayer.getBoatMaterial().toString()));
-			responseObject.addProperty("bukkit_color", preventNull(tPlayer.getBukkitColor().toString()));
+			responseObject.addProperty("color_code", preventNull(tPlayer.getSettings().getColor()));
+			responseObject.addProperty("hex_color", preventNull(tPlayer.getSettings().getHexColor()));
+			responseObject.addProperty("boat_type", preventNull(tPlayer.getSettings().getBoat().toString()));
+			responseObject.addProperty("boat_material", preventNull(tPlayer.getSettings().getBoatMaterial().toString()));
+			responseObject.addProperty("bukkit_color", preventNull(tPlayer.getSettings().getBukkitColor().toString()));
 			
 			response.status(200);
 			return responseObject.toString();
@@ -390,12 +396,17 @@ public class SparkManager {
 	
 	private static JsonObject serializeLocation(Location loc) {
 		JsonObject obj = new JsonObject();
-		obj.addProperty("x",loc.getX());
-		obj.addProperty("y",loc.getY());
-		obj.addProperty("z",loc.getZ());
-		obj.addProperty("pitch",loc.getPitch());
-		obj.addProperty("yaw",loc.getYaw());
-		obj.addProperty("world_name",loc.getWorld().getName());
+		if (loc == null) { // ISSUE #15
+			obj.addProperty("error", true);
+			obj.addProperty("error_message", "location received internally was null.");
+		} else {
+			obj.addProperty("x",loc.getX());
+			obj.addProperty("y",loc.getY());
+			obj.addProperty("z",loc.getZ());
+			obj.addProperty("pitch",loc.getPitch());
+			obj.addProperty("yaw",loc.getYaw());
+			obj.addProperty("world_name",loc.getWorld().getName());
+		}	
 		
 		return obj;
 	}
