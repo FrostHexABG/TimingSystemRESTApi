@@ -37,7 +37,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 	
 	private static TimingSystemRESTApiPlugin instance;
 	private static final int BSTATS_PLUGIN_ID = 18069;
-	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"1.2", "1.3", "1.5", "1.6", "1.7", "1.8"};
+	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"1.2", "1.3", "1.5", "1.6", "1.7", "1.8", "1.9"};
 	
 	public static ConsoleCommandSender clogger = Bukkit.getServer().getConsoleSender();
 	public static Logger log = Bukkit.getLogger();

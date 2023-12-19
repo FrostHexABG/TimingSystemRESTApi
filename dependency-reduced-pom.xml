@@ -4,7 +4,7 @@
   <groupId>com.frosthex</groupId>
   <artifactId>timingsystem.restapi</artifactId>
   <name>timingsystem.restapi</name>
-  <version>0.0.7</version>
+  <version>0.0.8</version>
   <url>http://maven.apache.org</url>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -52,13 +52,13 @@
     <dependency>
       <groupId>com.github.Makkuusen</groupId>
       <artifactId>TimingSystem</artifactId>
-      <version>1.8.1</version>
+      <version>53f8f33</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.19.3-R0.1-SNAPSHOT</version>
+      <version>1.20.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -76,6 +76,10 @@
         <exclusion>
           <artifactId>snakeyaml</artifactId>
           <groupId>org.yaml</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>joml</artifactId>
+          <groupId>org.joml</groupId>
         </exclusion>
         <exclusion>
           <artifactId>json-simple</artifactId>
