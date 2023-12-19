@@ -1,11 +1,6 @@
 package com.frosthex.timingsystem.restapi.network;
 
-import static spark.Spark.before;
-import static spark.Spark.get;
-import static spark.Spark.halt;
-import static spark.Spark.port;
-import static spark.Spark.staticFiles;
-import static spark.Spark.stop;
+import static spark.Spark.*;
 
 import java.util.Optional;
 import java.util.UUID;
