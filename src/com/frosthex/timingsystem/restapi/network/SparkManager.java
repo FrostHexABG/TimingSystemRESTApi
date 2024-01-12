@@ -400,7 +400,7 @@ public class SparkManager {
 			obj.addProperty("z",loc.getZ());
 			obj.addProperty("pitch",loc.getPitch());
 			obj.addProperty("yaw",loc.getYaw());
-			obj.addProperty("world_name",loc.getWorld().getName());
+			obj.addProperty("world_name", loc.isWorldLoaded() ? loc.getWorld().getName() : "null");
 		}	
 		
 		return obj;
