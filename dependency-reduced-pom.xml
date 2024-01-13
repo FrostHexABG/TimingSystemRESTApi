@@ -4,7 +4,7 @@
   <groupId>com.frosthex</groupId>
   <artifactId>timingsystem.restapi</artifactId>
   <name>timingsystem.restapi</name>
-  <version>1.0</version>
+  <version>1.0.1</version>
   <url>http://maven.apache.org</url>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>com.github.Makkuusen</groupId>
       <artifactId>TimingSystem</artifactId>
-      <version>2.0</version>
+      <version>2.0.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
