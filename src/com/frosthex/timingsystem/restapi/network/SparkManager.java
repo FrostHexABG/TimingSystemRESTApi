@@ -15,6 +15,8 @@ import com.google.gson.JsonObject;
 
 import me.makkuusen.timing.system.api.DriverDetails;
 import me.makkuusen.timing.system.api.TimingSystemAPI;
+import me.makkuusen.timing.system.api.event.*;
+import me.makkuusen.timing.system.api.EventResultsAPI;
 import me.makkuusen.timing.system.heat.Heat;
 import me.makkuusen.timing.system.timetrial.TimeTrialFinish;
 import me.makkuusen.timing.system.tplayer.TPlayer;
@@ -364,6 +366,25 @@ public class SparkManager {
 			return arrayObj.toString();
 		});
 		
+		// /api/v1/readonly/events/results/:eventname
+		get("/api/v1/readonly/events/results/:eventname", (request, response) -> {
+			String eventName = request.params("eventname");
+			
+			if (eventName == null) {
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The event name provided is null.\"}");
+			}
+			
+			EventResult eventResult = EventResultsAPI.getEventResult(eventName);
+			if (eventResult == null) {
+				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find an event with that name.\"}");
+			}
+
+			JsonObject eventResultObject = serializeEventResult(eventResult);
+			
+			response.status(200);
+			return eventResultObject.toString();
+		});
+		
 		get("/api/v1/readonly/tracks/example/dontuse", (request, response) -> {
 			return "";
 		});
@@ -404,6 +425,77 @@ public class SparkManager {
 		}	
 		
 		return obj;
+	}
+	
+	private static JsonObject serializeEventResult(EventResult eventResult) {
+		JsonObject eventResultObject = new JsonObject();
+		eventResultObject.addProperty("name", eventResult.getName());
+		eventResultObject.addProperty("date", eventResult.getDate());
+		eventResultObject.addProperty("track_name", eventResult.getTrackName());
+		eventResultObject.addProperty("participant_count", eventResult.getParticipants());
+
+		JsonArray roundResultArray = new JsonArray();
+		for (RoundResult roundResult : eventResult.getRounds()) {
+			roundResultArray.add(serializeRoundResult(roundResult));
+		}
+		eventResultObject.add("rounds", roundResultArray);
+		return eventResultObject;
+	}
+	
+	private static JsonObject serializeRoundResult(RoundResult roundResult) {
+		JsonObject roundResultObject = new JsonObject();
+		roundResultObject.addProperty("name", roundResult.getName());
+		roundResultObject.addProperty("type", roundResult.getType());
+
+		JsonArray heatResultArray = new JsonArray();
+		for (HeatResult heatResult : roundResult.getHeatResults()) {
+			heatResultArray.add(serializeHeatResult(heatResult));
+		}
+		roundResultObject.add("heats", heatResultArray);
+		return roundResultObject;
+	}
+
+	private static JsonObject serializeHeatResult(HeatResult heatResult) {
+		JsonObject heatResultObject = new JsonObject();
+		heatResultObject.addProperty("name", heatResult.getName());
+		if (heatResult.getTotalLaps() != null) { // null for qualification heats
+			heatResultObject.addProperty("total_laps", heatResult.getTotalLaps());
+		}
+
+		JsonArray driverResultArray = new JsonArray();
+		for (DriverResult driverResult : heatResult.getDriverResultList()) {
+			driverResultArray.add(serializeDriverResult(driverResult));
+		}
+		heatResultObject.add("driver_results", driverResultArray);
+		return heatResultObject;
+	}
+	
+	private static JsonObject serializeDriverResult(DriverResult driverResult) {
+		JsonObject driverResultObject = new JsonObject();
+		driverResultObject.addProperty("position", driverResult.getPosition());
+		driverResultObject.addProperty("start_position", driverResult.getStartPosition());
+		driverResultObject.addProperty("name", driverResult.getName());
+		driverResultObject.addProperty("uuid", driverResult.getUuid());
+		try {
+			driverResultObject.addProperty("finish_time", driverResult.getFinishTimeInMs());
+		} catch (NoSuchMethodError e) {
+			// for TimingSystem versions before commit 3d876f3, which added finishTimeInMs to the driverResult api
+		}
+
+		JsonArray lapResultArray = new JsonArray();
+		for (LapResult lapResult : driverResult.getLaps()) {
+			lapResultArray.add(serializeLapResult(lapResult));
+		}
+		driverResultObject.add("laps", lapResultArray);
+		return driverResultObject;
+	}
+	
+	private static JsonObject serializeLapResult(LapResult lapResult) {
+		JsonObject lapResultObject = new JsonObject();
+		lapResultObject.addProperty("time", lapResult.getTimeInMs());
+		lapResultObject.addProperty("pitstop", lapResult.isPitstop());
+		lapResultObject.addProperty("fastest", lapResult.isFastest());
+		return lapResultObject;
 	}
 	
 	private static String preventNull(String possibleNull) {
