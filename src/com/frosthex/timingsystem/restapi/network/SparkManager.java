@@ -214,7 +214,13 @@ public class SparkManager {
 			responseObject.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
 			responseObject.addProperty("weight", track.getWeight());
-			responseObject.addProperty("gui_item", track.getItem().toString());
+			ItemStack trackItem = track.getItem();
+			if (trackItem == null) {
+				Messager.msgConsole("&c[WARN] Track " + track.getCommandName() + " has a TrackItem that is null.");
+				responseObject.addProperty("gui_item", "null");
+			} else {
+				responseObject.addProperty("gui_item", track.getItem().toString());
+			}
 			JsonArray optionsArray = new JsonArray();
 			for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
 				optionsArray.add(option.toString());
@@ -268,7 +274,13 @@ public class SparkManager {
 			responseObject.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 			responseObject.addProperty("total_time_spent", track.getTotalTimeSpent());
 			responseObject.addProperty("weight", track.getWeight());
-			responseObject.addProperty("gui_item", track.getItem().toString());
+			ItemStack trackItem = track.getItem();
+			if (trackItem == null) {
+				Messager.msgConsole("&c[WARN] Track " + track.getCommandName() + " has a TrackItem that is null.");
+				responseObject.addProperty("gui_item", "null");
+			} else {
+				responseObject.addProperty("gui_item", track.getItem().toString());
+			}
 			JsonArray optionsArray = new JsonArray();
 			for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
 				optionsArray.add(option.toString());
