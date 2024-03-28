@@ -1,6 +1,11 @@
 package com.frosthex.timingsystem.restapi.network;
 
-import static spark.Spark.*;
+import static spark.Spark.before;
+import static spark.Spark.get;
+import static spark.Spark.halt;
+import static spark.Spark.port;
+import static spark.Spark.staticFiles;
+import static spark.Spark.stop;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -8,15 +13,21 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
 
 import com.frosthex.timingsystem.restapi.TimingSystemRESTApiPlugin;
+import com.frosthex.timingsystem.restapi.utils.Messager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import me.makkuusen.timing.system.api.DriverDetails;
-import me.makkuusen.timing.system.api.TimingSystemAPI;
-import me.makkuusen.timing.system.api.event.*;
 import me.makkuusen.timing.system.api.EventResultsAPI;
+import me.makkuusen.timing.system.api.TimingSystemAPI;
+import me.makkuusen.timing.system.api.event.DriverResult;
+import me.makkuusen.timing.system.api.event.EventResult;
+import me.makkuusen.timing.system.api.event.HeatResult;
+import me.makkuusen.timing.system.api.event.LapResult;
+import me.makkuusen.timing.system.api.event.RoundResult;
 import me.makkuusen.timing.system.heat.Heat;
 import me.makkuusen.timing.system.timetrial.TimeTrialFinish;
 import me.makkuusen.timing.system.tplayer.TPlayer;
@@ -147,7 +158,14 @@ public class SparkManager {
 				trackObj.addProperty("total_finishes", track.getTimeTrials().getTotalFinishes());
 				trackObj.addProperty("total_time_spent", track.getTotalTimeSpent());
 				trackObj.addProperty("weight", track.getWeight());
-				trackObj.addProperty("gui_item", track.getItem().toString());
+				ItemStack trackItem = track.getItem();
+				if (trackItem == null) {
+					Messager.msgConsole("&c[WARN] Track " + track.getCommandName() + " has a TrackItem that is null.");
+					trackObj.addProperty("gui_item", "null");
+				} else {
+					trackObj.addProperty("gui_item", track.getItem().toString());
+				}
+				
 				JsonArray optionsArray = new JsonArray();
 				for (TrackOption option : track.getTrackOptions().getTrackOptions()) {
 					optionsArray.add(option.toString());
