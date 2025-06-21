@@ -10,6 +10,7 @@ import static spark.Spark.stop;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.makkuusen.timing.system.round.RoundType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -367,6 +368,7 @@ public class SparkManager {
 				heatObj.addProperty("name", heat.getName());
 				heatObj.addProperty("event_name", heat.getEvent().getDisplayName());
 				heatObj.addProperty("id", heat.getId());
+				heatObj.addProperty("qualifying", (heat.getRound().getType() == RoundType.QUALIFICATION)); // Issue #19
 				
 				JsonArray driverPositionsArray = new JsonArray();
 				var driverDetailsList = TimingSystemAPI.getAllDriverDetailsFromHeat(heat);

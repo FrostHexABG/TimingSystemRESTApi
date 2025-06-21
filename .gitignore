@@ -1,1 +1,8 @@
 /target/
+/.idea/compiler.xml
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/timingsystem.restapi.iml
+/.idea/vcs.xml
