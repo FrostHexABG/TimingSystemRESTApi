@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import me.makkuusen.timing.system.round.RoundType;
+import me.makkuusen.timing.system.track.medals.TrackMedals;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -38,7 +39,7 @@ import me.makkuusen.timing.system.track.tags.TrackTag;
 
 /**
  * TimingSystemRESTApi - Provides a basic JSON REST API for the TimingSystem plugin.
- * Copyright (C) 2023 Justin "JustBru00" Brubaker
+ * Copyright (C) 2025 Justin "JustBru00" Brubaker
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -179,6 +180,38 @@ public class SparkManager {
 					tagsArray.add(trackTag.getValue());
 				}
 				trackObj.add("tags", tagsArray);
+
+                // Issue #24 - Add Medals
+                JsonObject medalsObject = new JsonObject();
+                TrackMedals tm = track.getTrackMedals();
+                medalsObject.addProperty("active", tm.isActive());
+
+                JsonObject netheriteObject = new JsonObject();
+                netheriteObject.addProperty("time", tm.getNetherite().getTime());
+                medalsObject.add("netherite", netheriteObject);
+
+                JsonObject emeraldObject = new JsonObject();
+                emeraldObject.addProperty("time", tm.getEmerald().getTime());
+                medalsObject.add("emerald", emeraldObject);
+
+                JsonObject diamondObject = new JsonObject();
+                diamondObject.addProperty("time", tm.getDiamond().getTime());
+                medalsObject.add("diamond", diamondObject);
+
+                JsonObject goldObject = new JsonObject();
+                goldObject.addProperty("time", tm.getGold().getTime());
+                medalsObject.add("gold", goldObject);
+
+                JsonObject silverObject = new JsonObject();
+                silverObject.addProperty("time", tm.getSilver().getTime());
+                medalsObject.add("silver", silverObject);
+
+                JsonObject copperObject = new JsonObject();
+                copperObject.addProperty("time", tm.getCopper().getTime());
+                medalsObject.add("copper", copperObject);
+
+                trackObj.add("medals", medalsObject);
+                // END - Issue #24
 				
 				tracksListObject.add(trackObj);
 			}
@@ -234,6 +267,39 @@ public class SparkManager {
 				tagsArray.add(trackTag.getValue());
 			}
 			responseObject.add("tags", tagsArray);
+
+            // Issue #24 - Add Medals
+            JsonObject medalsObject = new JsonObject();
+            TrackMedals tm = track.getTrackMedals();
+            medalsObject.addProperty("active", tm.isActive());
+
+            JsonObject netheriteObject = new JsonObject();
+            netheriteObject.addProperty("time", tm.getNetherite().getTime());
+            medalsObject.add("netherite", netheriteObject);
+
+            JsonObject emeraldObject = new JsonObject();
+            emeraldObject.addProperty("time", tm.getEmerald().getTime());
+            medalsObject.add("emerald", emeraldObject);
+
+            JsonObject diamondObject = new JsonObject();
+            diamondObject.addProperty("time", tm.getDiamond().getTime());
+            medalsObject.add("diamond", diamondObject);
+
+            JsonObject goldObject = new JsonObject();
+            goldObject.addProperty("time", tm.getGold().getTime());
+            medalsObject.add("gold", goldObject);
+
+            JsonObject silverObject = new JsonObject();
+            silverObject.addProperty("time", tm.getSilver().getTime());
+            medalsObject.add("silver", silverObject);
+
+            JsonObject copperObject = new JsonObject();
+            copperObject.addProperty("time", tm.getCopper().getTime());
+            medalsObject.add("copper", copperObject);
+
+            responseObject.add("medals", medalsObject);
+            // END - Issue #24
+
 			JsonArray topListArray = new JsonArray();
 			for (TimeTrialFinish finish : track.getTimeTrials().getTopList()) {
 				JsonObject timeTrialFinishObject = new JsonObject();
@@ -294,6 +360,39 @@ public class SparkManager {
 				tagsArray.add(trackTag.getValue());
 			}
 			responseObject.add("tags", tagsArray);
+
+            // Issue #24 - Add Medals
+            JsonObject medalsObject = new JsonObject();
+            TrackMedals tm = track.getTrackMedals();
+            medalsObject.addProperty("active", tm.isActive());
+
+            JsonObject netheriteObject = new JsonObject();
+            netheriteObject.addProperty("time", tm.getNetherite().getTime());
+            medalsObject.add("netherite", netheriteObject);
+
+            JsonObject emeraldObject = new JsonObject();
+            emeraldObject.addProperty("time", tm.getEmerald().getTime());
+            medalsObject.add("emerald", emeraldObject);
+
+            JsonObject diamondObject = new JsonObject();
+            diamondObject.addProperty("time", tm.getDiamond().getTime());
+            medalsObject.add("diamond", diamondObject);
+
+            JsonObject goldObject = new JsonObject();
+            goldObject.addProperty("time", tm.getGold().getTime());
+            medalsObject.add("gold", goldObject);
+
+            JsonObject silverObject = new JsonObject();
+            silverObject.addProperty("time", tm.getSilver().getTime());
+            medalsObject.add("silver", silverObject);
+
+            JsonObject copperObject = new JsonObject();
+            copperObject.addProperty("time", tm.getCopper().getTime());
+            medalsObject.add("copper", copperObject);
+
+            responseObject.add("medals", medalsObject);
+            // END - Issue #24
+
 			JsonArray topListArray = new JsonArray();
 			for (TimeTrialFinish finish : track.getTimeTrials().getTopList()) {
 				JsonObject timeTrialFinishObject = new JsonObject();
@@ -421,7 +520,7 @@ public class SparkManager {
 			return "";
 		});
 	}
-	
+
 	public static void stopSpark() {
 		stop();
 	}
