@@ -4,7 +4,7 @@
   <groupId>com.frosthex</groupId>
   <artifactId>timingsystem.restapi</artifactId>
   <name>timingsystem.restapi</name>
-  <version>1.2</version>
+  <version>2.0-SNAPSHOT+2025.november.6</version>
   <url>http://maven.apache.org</url>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -52,13 +52,13 @@
     <dependency>
       <groupId>com.github.FrostHexABG</groupId>
       <artifactId>TimingSystem</artifactId>
-      <version>2.3</version>
+      <version>3.0.6</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.20.1-R0.1-SNAPSHOT</version>
+      <version>1.21.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -68,10 +68,6 @@
         <exclusion>
           <artifactId>gson</artifactId>
           <groupId>com.google.code.gson</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bungeecord-chat</artifactId>
-          <groupId>net.md-5</groupId>
         </exclusion>
         <exclusion>
           <artifactId>snakeyaml</artifactId>
@@ -94,8 +90,20 @@
           <groupId>org.apache.logging.log4j</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>brigadier</artifactId>
+          <groupId>com.mojang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bungeecord-chat</artifactId>
+          <groupId>net.md-5</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>maven-resolver-provider</artifactId>
           <groupId>org.apache.maven</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jspecify</artifactId>
+          <groupId>org.jspecify</groupId>
         </exclusion>
         <exclusion>
           <artifactId>adventure-api</artifactId>
@@ -124,14 +132,6 @@
         <exclusion>
           <artifactId>checker-qual</artifactId>
           <groupId>org.checkerframework</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>asm</artifactId>
-          <groupId>org.ow2.asm</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>asm-commons</artifactId>
-          <groupId>org.ow2.asm</groupId>
         </exclusion>
       </exclusions>
     </dependency>

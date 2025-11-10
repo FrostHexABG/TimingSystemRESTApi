@@ -15,7 +15,7 @@ import com.frosthex.timingsystem.restapi.utils.Messager;
 
 /**
  * TimingSystemRESTApi - Provides a basic JSON REST API for the TimingSystem plugin.
- * Copyright (C) 2023 Justin "JustBru00" Brubaker
+ * Copyright (C) 2025 Justin "JustBru00" Brubaker
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -37,7 +37,7 @@ public class TimingSystemRESTApiPlugin extends JavaPlugin {
 	
 	private static TimingSystemRESTApiPlugin instance;
 	private static final int BSTATS_PLUGIN_ID = 18069;
-	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"2.0","2.1","2.2","2.3","3.0"};
+	private static final String[] TIMING_SYSTEM_SUPPORTED_VERSIONS = {"3.0"};
 	
 	public static ConsoleCommandSender clogger = Bukkit.getServer().getConsoleSender();
 	public static Logger log = Bukkit.getLogger();
