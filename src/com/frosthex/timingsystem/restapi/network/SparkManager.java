@@ -7,6 +7,7 @@ import static spark.Spark.port;
 import static spark.Spark.staticFiles;
 import static spark.Spark.stop;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -109,7 +110,7 @@ public class SparkManager {
 			var tracks = TimingSystemAPI.getTracks();
 			
 			if (tracks == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
 			}
 			
 			JsonObject tracksResponseObject = new JsonObject();
@@ -136,7 +137,7 @@ public class SparkManager {
 			var tracks = TimingSystemAPI.getTracks();
 			
 			if (tracks == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystemAPI.getTracks() is null.\"}");
 			}
 			
 			JsonObject tracksResponseObject = new JsonObject();
@@ -227,12 +228,12 @@ public class SparkManager {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
 			}
 			
 			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
 			if (optionalTrack.isEmpty()) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find a track with that name.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. Could not find a track with that name.\"}");
 			}
 			
 			Track track = optionalTrack.get();
@@ -320,12 +321,12 @@ public class SparkManager {
 			String trackInternalName = request.params("trackname");
 			
 			if (trackInternalName == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. The track name provided is null.\"}");
 			}
 			
 			Optional<Track> optionalTrack = TimingSystemAPI.getTrack(trackInternalName);
 			if (optionalTrack.isEmpty()) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find a track with that name.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. Could not find a track with that name.\"}");
 			}
 			
 			Track track = optionalTrack.get();
@@ -414,7 +415,7 @@ public class SparkManager {
 			String uuidOrUsernameString = request.params("uuidorusername");
 			
 			if (uuidOrUsernameString == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username argument was null\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username argument was null\"}");
 			}			
 			
 			UUID uuid = UUID.randomUUID();
@@ -426,7 +427,7 @@ public class SparkManager {
 				OfflinePlayer offline = Bukkit.getOfflinePlayerIfCached(uuidOrUsernameString);
 				
 				if (offline == null) {
-					halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username couldn't be parsed from input.\"}");
+					halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. UUID or username couldn't be parsed from input.\"}");
 				} else {
 					uuid = offline.getUniqueId();
 				}				
@@ -435,7 +436,7 @@ public class SparkManager {
 			tPlayer = TimingSystemAPI.getTPlayer(uuid);
 			
 			if (tPlayer == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. That player couldn't be found.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. That player couldn't be found.\"}");
 			}
 			
 			JsonObject responseObject = new JsonObject();
@@ -457,7 +458,7 @@ public class SparkManager {
 			var heats = TimingSystemAPI.getRunningHeats();
 			
 			if (heats == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong TimingSystem.getRunningHeats() is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong TimingSystem.getRunningHeats() is null.\"}");
 			}
 			
 			JsonArray arrayObj = new JsonArray();
@@ -470,8 +471,15 @@ public class SparkManager {
 				heatObj.addProperty("qualifying", (heat.getRound().getType() == RoundType.QUALIFICATION)); // Issue #19
 				
 				JsonArray driverPositionsArray = new JsonArray();
-				var driverDetailsList = TimingSystemAPI.getAllDriverDetailsFromHeat(heat);
-								
+				List<DriverDetails> driverDetailsList = null;
+				// ISSUE #26
+				try {
+					driverDetailsList = TimingSystemAPI.getAllDriverDetailsFromHeat(heat);
+				} catch (IndexOutOfBoundsException e ) {
+					halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. TimingSystem generated a IndexOutOfBoundsException while trying to getAllDriverDetailsFromHeat().\"}");
+				}
+				// END ISSUE #26
+
 				for (DriverDetails dd : driverDetailsList) {
 					JsonObject driverObj = new JsonObject();
 					driverObj.addProperty("name", dd.getName());
@@ -486,7 +494,7 @@ public class SparkManager {
 					driverObj.addProperty("is_in_pit", dd.isInpit());
 					driverObj.addProperty("is_offline", dd.isOffline());
 					driverObj.addProperty("best_lap", dd.getBestLap());
-					
+
 					driverPositionsArray.add(driverObj);
 				}
 				heatObj.add("driver_details", driverPositionsArray);
@@ -502,12 +510,12 @@ public class SparkManager {
 			String eventName = request.params("eventname");
 			
 			if (eventName == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. The event name provided is null.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. The event name provided is null.\"}");
 			}
 			
 			EventResult eventResult = EventResultsAPI.getEventResult(eventName);
 			if (eventResult == null) {
-				halt(401, "{\"error\":true,\"error_message\":\"Something went wrong. Could find an event with that name.\"}");
+				halt(500, "{\"error\":true,\"error_message\":\"Something went wrong. Could find an event with that name.\"}");
 			}
 
 			JsonObject eventResultObject = serializeEventResult(eventResult);
