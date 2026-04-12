@@ -185,7 +185,7 @@ public class SparkManager {
                 // Issue #24 - Add Medals
                 JsonObject medalsObject = new JsonObject();
                 TrackMedals tm = track.getTrackMedals();
-                medalsObject.addProperty("active", tm.isActive());
+                medalsObject.addProperty("active", tm.isFull());
 
                 JsonObject netheriteObject = new JsonObject();
                 netheriteObject.addProperty("time", tm.getNetherite().getTime());
@@ -272,7 +272,7 @@ public class SparkManager {
             // Issue #24 - Add Medals
             JsonObject medalsObject = new JsonObject();
             TrackMedals tm = track.getTrackMedals();
-            medalsObject.addProperty("active", tm.isActive());
+            medalsObject.addProperty("active", tm.isFull());
 
             JsonObject netheriteObject = new JsonObject();
             netheriteObject.addProperty("time", tm.getNetherite().getTime());
@@ -365,7 +365,7 @@ public class SparkManager {
             // Issue #24 - Add Medals
             JsonObject medalsObject = new JsonObject();
             TrackMedals tm = track.getTrackMedals();
-            medalsObject.addProperty("active", tm.isActive());
+            medalsObject.addProperty("active", tm.isFull());
 
             JsonObject netheriteObject = new JsonObject();
             netheriteObject.addProperty("time", tm.getNetherite().getTime());
