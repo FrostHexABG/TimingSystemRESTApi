@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import com.tekad.TimingLeague.*;
 import com.tekad.TimingLeague.API.TimingLeagueAPI;
+import me.makkuusen.timing.system.event.Event;
 import me.makkuusen.timing.system.round.RoundType;
 import me.makkuusen.timing.system.track.medals.TrackMedals;
 import org.bukkit.Bukkit;
@@ -507,6 +508,23 @@ public class SparkManager {
 			
 			response.status(200);
 			return arrayObj.toString();
+		});
+
+		// /api/v1/readonly/events
+		get("/api/v1/readonly/events", (request, response) -> {
+			JsonArray eventsArray = new JsonArray();
+			for (Event event : TimingSystemAPI.getEvents()) {
+				JsonObject eventObject = new JsonObject();
+				eventObject.addProperty("name", event.getDisplayName());
+				eventObject.addProperty("date", event.getDate());
+				Track track = event.getTrack();
+				eventObject.addProperty("track_name", track == null ? null : track.getDisplayName());
+				eventObject.addProperty("state", event.getState().name()); // SETUP, RUNNING or FINISHED
+				eventsArray.add(eventObject);
+			}
+
+				response.status(200);
+				return eventsArray.toString();
 		});
 		
 		// /api/v1/readonly/events/results/:eventname
